@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEGAM - Play Unlimited Tournaments</title>
+    <title>make game with AI</title>
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
@@ -12,8 +12,8 @@
             <span class="logo">Make game with AI</span>
             <ul class="nav-links">
                 <li><a href="#">Home</a></li>
-                <li><a href="#">Tournaments</a></li>
-                <li><a href="#">Pages</a></li>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">About</a></li>
                 <li><a href="#">Contact</a></li>
             </ul>
         </div>
@@ -28,74 +28,174 @@
     </nav>
     <header class="hero-section">
         <div class="hero-content">
-            <h2 class="hero-subtitle">PLAY UNLIMITED</h2>
-            <h1 class="hero-title">TOURNAMENTS</h1>
-            <p class="hero-desc">Compete in Free and Paid entry Tournaments. Transform your games to real money eSports.</p>
-            <a href="#" class="get-started-btn">GET STARTED</a>
+            <h2 class="hero-subtitle">CREATE GAMES WITH ARTIFICIAL INTELLIGENCE</h2>
+            <h1 class="hero-title">Make Game with AI</h1>
+            <p class="hero-desc">Empower your creativity and build amazing games using the power of AI. Instantly generate game ideas, assets, and logic. No coding experience required!</p>
+            <a href="#" class="get-started-btn join-btn-hero">Get Started Free</a>
         </div>
         <div class="hero-players">
             <div class="player player-left">
-                <img src="https://cdn.pixabay.com/photo/2017/01/31/13/14/avatar-2026510_1280.png" alt="Player 1">
+                <img src="https://cdn.pixabay.com/photo/2017/01/31/13/14/avatar-2026510_1280.png" alt="AI Avatar 1">
+                <span>AI Designer</span>
             </div>
             <div class="vs-logo">
-                <img src="https://cdn-icons-png.flaticon.com/512/616/616494.png" alt="VS" />
+                <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="AI" />
             </div>
             <div class="player player-right">
-                <img src="https://cdn.pixabay.com/photo/2017/01/31/13/14/avatar-2026510_1280.png" alt="Player 2">
+                <img src="https://cdn.pixabay.com/photo/2017/01/31/13/14/avatar-2026510_1280.png" alt="AI Avatar 2">
+                <span>Game Creator</span>
             </div>
         </div>
     </header>
+    <!-- Modal Login -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
-            <span class="close" id="closeModal">&times;</span>
+            <span class="close" id="closeLoginModal">&times;</span>
             <h2>Login</h2>
             <form id="loginForm">
-                <input type="text" id="username" placeholder="Username" required>
-                <input type="password" id="password" placeholder="Password" required>
+                <input type="text" id="loginUsername" placeholder="Username" required>
+                <input type="password" id="loginPassword" placeholder="Password" required>
                 <button type="submit">Login</button>
                 <div id="loginError" class="error-message"></div>
             </form>
         </div>
     </div>
+    <!-- Modal Register -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeRegisterModal">&times;</span>
+            <h2>Sign Up</h2>
+            <form id="registerForm">
+                <input type="text" id="registerUsername" placeholder="Username" required>
+                <input type="password" id="registerPassword" placeholder="Password" required>
+                <input type="password" id="registerConfirm" placeholder="Confirm Password" required>
+                <button type="submit">Register</button>
+                <div id="registerError" class="error-message"></div>
+            </form>
+        </div>
+    </div>
     <script>
-    // Demo user database
-    const users = { 'admin': 'admin123', 'user': 'user123' };
+    // User database (localStorage or fallback to demo)
+    function getUsers() {
+        return JSON.parse(localStorage.getItem('users') || '{"admin":"admin123","user":"user123"}');
+    }
+    function setUsers(users) {
+        localStorage.setItem('users', JSON.stringify(users));
+    }
+    // Elements
     const loginBtn = document.querySelector('.login-btn');
     const joinBtn = document.querySelector('.join-btn');
-    const modal = document.getElementById('loginModal');
-    const closeModal = document.getElementById('closeModal');
+    const joinBtnHero = document.querySelector('.join-btn-hero');
+    const loginModal = document.getElementById('loginModal');
+    const closeLoginModal = document.getElementById('closeLoginModal');
     const loginForm = document.getElementById('loginForm');
     const loginError = document.getElementById('loginError');
-    let loggedInUser = null;
+    const registerModal = document.getElementById('registerModal');
+    const closeRegisterModal = document.getElementById('closeRegisterModal');
+    const registerForm = document.getElementById('registerForm');
+    const registerError = document.getElementById('registerError');
+    let loggedInUser = localStorage.getItem('loggedInUser') || null;
 
-    // Open modal
+    // Show/hide modals
+    function showModal(modal) { modal.style.display = 'flex'; }
+    function hideModal(modal) { modal.style.display = 'none'; }
+    // Open login modal
     loginBtn.addEventListener('click', function(e) {
         e.preventDefault();
-        modal.style.display = 'flex';
+        showModal(loginModal);
         loginError.textContent = '';
     });
-    // Close modal
-    closeModal.onclick = function() {
-        modal.style.display = 'none';
-    };
+    // Open register modal
+    joinBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        showModal(registerModal);
+        registerError.textContent = '';
+    });
+    if (joinBtnHero) joinBtnHero.addEventListener('click', function(e) {
+        e.preventDefault();
+        showModal(registerModal);
+        registerError.textContent = '';
+    });
+    // Close modals
+    closeLoginModal.onclick = () => hideModal(loginModal);
+    closeRegisterModal.onclick = () => hideModal(registerModal);
     window.onclick = function(event) {
-        if (event.target == modal) modal.style.display = 'none';
+        if (event.target == loginModal) hideModal(loginModal);
+        if (event.target == registerModal) hideModal(registerModal);
     };
-    // Handle login
+    // Login logic
     loginForm.onsubmit = function(e) {
         e.preventDefault();
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
+        const username = document.getElementById('loginUsername').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const users = getUsers();
         if (users[username] && users[username] === password) {
             loggedInUser = username;
-            modal.style.display = 'none';
-            loginBtn.textContent = username;
-            loginBtn.classList.add('logged-in');
-            joinBtn.style.display = 'none';
+            localStorage.setItem('loggedInUser', username);
+            updateNavbarUser();
+            hideModal(loginModal);
         } else {
             loginError.textContent = 'Invalid username or password!';
         }
     };
+    // Register logic
+    registerForm.onsubmit = function(e) {
+        e.preventDefault();
+        const username = document.getElementById('registerUsername').value.trim();
+        const password = document.getElementById('registerPassword').value;
+        const confirm = document.getElementById('registerConfirm').value;
+        let users = getUsers();
+        if (users[username]) {
+            registerError.textContent = 'Username already exists!';
+            return;
+        }
+        if (password.length < 4) {
+            registerError.textContent = 'Password must be at least 4 characters!';
+            return;
+        }
+        if (password !== confirm) {
+            registerError.textContent = 'Passwords do not match!';
+            return;
+        }
+        users[username] = password;
+        setUsers(users);
+        loggedInUser = username;
+        localStorage.setItem('loggedInUser', username);
+        updateNavbarUser();
+        hideModal(registerModal);
+    };
+    // Update navbar after login/register
+    function updateNavbarUser() {
+        if (loggedInUser) {
+            loginBtn.textContent = loggedInUser + ' (Logout)';
+            loginBtn.classList.add('logged-in');
+            joinBtn.style.display = 'none';
+            if (joinBtnHero) joinBtnHero.style.display = 'none';
+            loginBtn.onclick = function(e) {
+                e.preventDefault();
+                if (confirm('Logout?')) {
+                    loggedInUser = null;
+                    localStorage.removeItem('loggedInUser');
+                    loginBtn.textContent = 'Login';
+                    loginBtn.classList.remove('logged-in');
+                    joinBtn.style.display = '';
+                    if (joinBtnHero) joinBtnHero.style.display = '';
+                }
+            };
+        } else {
+            loginBtn.textContent = 'Login';
+            loginBtn.classList.remove('logged-in');
+            joinBtn.style.display = '';
+            if (joinBtnHero) joinBtnHero.style.display = '';
+            loginBtn.onclick = function(e) {
+                e.preventDefault();
+                showModal(loginModal);
+                loginError.textContent = '';
+            };
+        }
+    }
+    // On load
+    updateNavbarUser();
     </script>
 </body>
 </html> 
