@@ -3,49 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Make Game With AI</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Game Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        header {
+            width: 100%;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+
+        .game-container {
+            display: none;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .game-area {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        #gameCanvas {
+            background: #000;
+            border-radius: 5px;
+        }
+
+        .score {
+            font-size: 24px;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-    <header class="navbar">
-        <div class="navbar-left">
-            <span class="logo"><span class="logo-accent">Make</span> Game With AI</span>
-        </div>
-        <nav class="navbar-center">
-            <ul class="menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="games.html">Games</a></li>
-                <li><a href="#">Pages</a></li>
-                <li><a href="#">Articles</a></li>
-                <li><a href="#">Reviews</a></li>
-                <li><a href="#">Contact</a></li>
-            </ul>
-        </nav>
-        <div class="navbar-right">
-            <form class="search-form" id="gameSearchForm" autocomplete="off">
-                <input type="text" id="gameSearchInput" placeholder="Tìm game...">
-                <button type="submit"><span class="icon-search"></span></button>
-            </form>
-            <button class="login-btn" style="background:linear-gradient(90deg,#00ffff,#7fff00);color:#222;font-weight:bold;padding:10px 28px;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(0,255,255,0.18);font-size:1.1em;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;outline:none;">Login / Register</button>
-        </div>
+    <header>
+        <h1>Game Portal</h1>
     </header>
-    <section class="hero">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1>The Power of Gaming</h1>
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tristique justo id elit bibendum pharetra non vitae lectus. Mauris felis, dapibus a ultrices sed, commodo vitae odio.</p>
-            <button class="cta-btn">Next Game</button>
+
+    <div class="container">
+        <div class="login-container" id="loginSection">
+            <h2>Login to Play</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
         </div>
-    </section>
-    <script src="script.js"></script>
-    <script src="auth.js"></script>
+
+        <div class="game-container" id="gameSection">
+            <h2>Welcome, <span id="playerName"></span>!</h2>
+            <div class="score">Score: <span id="score">0</span></div>
+            <div class="game-area">
+                <canvas id="gameCanvas" width="800" height="400"></canvas>
+            </div>
+        </div>
+    </div>
+
     <script>
-    document.getElementById('gameSearchForm').onsubmit = function(e) {
-        e.preventDefault();
-        var val = document.getElementById('gameSearchInput').value.trim();
-        if (!val) return;
-        window.location.href = 'games.html?q=' + encodeURIComponent(val);
-    };
+        // Simple user database (in real application, this would be on a server)
+        const users = {
+            'admin': 'admin123',
+            'user': 'user123'
+        };
+
+        // Game variables
+        let score = 0;
+        let gameLoop;
+        let player = {
+            x: 50,
+            y: 200,
+            width: 30,
+            height: 30,
+            speed: 5
+        };
+
+        // Login form handling
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            if (users[username] && users[username] === password) {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('gameSection').style.display = 'block';
+                document.getElementById('playerName').textContent = username;
+                startGame();
+            } else {
+                alert('Invalid username or password!');
+            }
+        });
+
+        // Game initialization
+        function startGame() {
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Game loop
+            gameLoop = setInterval(() => {
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw player
+                ctx.fillStyle = '#4CAF50';
+                ctx.fillRect(player.x, player.y, player.width, player.height);
+                
+                // Draw obstacles (simple example)
+                ctx.fillStyle = 'red';
+                ctx.fillRect(700, 200, 20, 20);
+            }, 1000/60);
+
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowUp':
+                        player.y -= player.speed;
+                        break;
+                    case 'ArrowDown':
+                        player.y += player.speed;
+                        break;
+                    case 'ArrowLeft':
+                        player.x -= player.speed;
+                        break;
+                    case 'ArrowRight':
+                        player.x += player.speed;
+                        break;
+                }
+                
+                // Keep player within canvas bounds
+                player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+                player.y = Math.max(0, Math.min(canvas.height - player.height, player.y));
+            });
+        }
     </script>
 </body>
 </html> 
