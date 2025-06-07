@@ -74,14 +74,20 @@
             </form>
         </div>
     </div>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script>
-    // User database (localStorage or fallback to demo)
-    function getUsers() {
-        return JSON.parse(localStorage.getItem('users') || '{"admin":"admin123","user":"user123"}');
-    }
-    function setUsers(users) {
-        localStorage.setItem('users', JSON.stringify(users));
-    }
+    // TODO: Dán firebaseConfig của bạn vào đây
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_AUTH_DOMAIN",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_STORAGE_BUCKET",
+      messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     // Elements
     const loginBtn = document.querySelector('.login-btn');
     const joinBtn = document.querySelector('.join-btn');
@@ -94,8 +100,7 @@
     const closeRegisterModal = document.getElementById('closeRegisterModal');
     const registerForm = document.getElementById('registerForm');
     const registerError = document.getElementById('registerError');
-    let loggedInUser = localStorage.getItem('loggedInUser') || null;
-
+    let loggedInUser = null;
     // Show/hide modals
     function showModal(modal) { modal.style.display = 'flex'; }
     function hideModal(modal) { modal.style.display = 'none'; }
@@ -123,64 +128,61 @@
         if (event.target == loginModal) hideModal(loginModal);
         if (event.target == registerModal) hideModal(registerModal);
     };
-    // Login logic
+    // Login logic (Firebase)
     loginForm.onsubmit = function(e) {
         e.preventDefault();
-        const username = document.getElementById('loginUsername').value.trim();
+        const email = document.getElementById('loginUsername').value.trim();
         const password = document.getElementById('loginPassword').value;
-        const users = getUsers();
-        if (users[username] && users[username] === password) {
-            loggedInUser = username;
-            localStorage.setItem('loggedInUser', username);
-            updateNavbarUser();
-            hideModal(loginModal);
-        } else {
-            loginError.textContent = 'Invalid username or password!';
-        }
+        auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                loggedInUser = userCredential.user.email;
+                updateNavbarUser();
+                hideModal(loginModal);
+            })
+            .catch((error) => {
+                loginError.textContent = error.message.replace('Firebase: ', '');
+            });
     };
-    // Register logic
+    // Register logic (Firebase)
     registerForm.onsubmit = function(e) {
         e.preventDefault();
-        const username = document.getElementById('registerUsername').value.trim();
+        const email = document.getElementById('registerUsername').value.trim();
         const password = document.getElementById('registerPassword').value;
         const confirm = document.getElementById('registerConfirm').value;
-        let users = getUsers();
-        if (users[username]) {
-            registerError.textContent = 'Username already exists!';
-            return;
-        }
-        if (password.length < 4) {
-            registerError.textContent = 'Password must be at least 4 characters!';
+        if (password.length < 6) {
+            registerError.textContent = 'Password must be at least 6 characters!';
             return;
         }
         if (password !== confirm) {
             registerError.textContent = 'Passwords do not match!';
             return;
         }
-        users[username] = password;
-        setUsers(users);
-        loggedInUser = username;
-        localStorage.setItem('loggedInUser', username);
-        updateNavbarUser();
-        hideModal(registerModal);
+        auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                loggedInUser = userCredential.user.email;
+                updateNavbarUser();
+                hideModal(registerModal);
+            })
+            .catch((error) => {
+                registerError.textContent = error.message.replace('Firebase: ', '');
+            });
     };
     // Update navbar after login/register
     function updateNavbarUser() {
-        if (loggedInUser) {
-            loginBtn.textContent = loggedInUser + ' (Logout)';
+        if (auth.currentUser) {
+            loginBtn.textContent = auth.currentUser.email + ' (Logout)';
             loginBtn.classList.add('logged-in');
             joinBtn.style.display = 'none';
             if (joinBtnHero) joinBtnHero.style.display = 'none';
             loginBtn.onclick = function(e) {
                 e.preventDefault();
-                if (confirm('Logout?')) {
+                auth.signOut().then(() => {
                     loggedInUser = null;
-                    localStorage.removeItem('loggedInUser');
                     loginBtn.textContent = 'Login';
                     loginBtn.classList.remove('logged-in');
                     joinBtn.style.display = '';
                     if (joinBtnHero) joinBtnHero.style.display = '';
-                }
+                });
             };
         } else {
             loginBtn.textContent = 'Login';
@@ -194,8 +196,11 @@
             };
         }
     }
-    // On load
-    updateNavbarUser();
+    // Listen for auth state changes
+    auth.onAuthStateChanged(function(user) {
+        loggedInUser = user ? user.email : null;
+        updateNavbarUser();
+    });
     </script>
 </body>
 </html> 
