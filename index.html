@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Game With AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-left">
+            <span class="logo"><span class="logo-accent">Make</span> Game With AI</span>
+        </div>
+        <nav class="navbar-center">
+            <ul class="menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="games.html">Games</a></li>
+                <li><a href="#">Pages</a></li>
+                <li><a href="#">Articles</a></li>
+                <li><a href="#">Reviews</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+        <div class="navbar-right">
+            <form class="search-form" id="gameSearchForm" autocomplete="off">
+                <input type="text" id="gameSearchInput" placeholder="Tìm game...">
+                <button type="submit"><span class="icon-search"></span></button>
+            </form>
+            <button class="login-btn" style="background:linear-gradient(90deg,#00ffff,#7fff00);color:#222;font-weight:bold;padding:10px 28px;border:none;border-radius:8px;box-shadow:0 2px 8px rgba(0,255,255,0.18);font-size:1.1em;cursor:pointer;transition:background 0.2s,box-shadow 0.2s;outline:none;">Login / Register</button>
+        </div>
+    </header>
+    <section class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1>The Power of Gaming</h1>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc tristique justo id elit bibendum pharetra non vitae lectus. Mauris felis, dapibus a ultrices sed, commodo vitae odio.</p>
+            <button class="cta-btn">Next Game</button>
+        </div>
+    </section>
+    <script src="script.js"></script>
+    <script src="auth.js"></script>
+    <script>
+    document.getElementById('gameSearchForm').onsubmit = function(e) {
+        e.preventDefault();
+        var val = document.getElementById('gameSearchInput').value.trim();
+        if (!val) return;
+        window.location.href = 'games.html?q=' + encodeURIComponent(val);
+    };
+    </script>
+</body>
+</html> 
